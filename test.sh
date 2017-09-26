@@ -1,5 +1,14 @@
 #!/bin/bash
 source $PWD/config.sh
-IMAGE="$FACE_DATASET/Bill Cosby/Bill Cosby-0002.png"
-curl -F "image=@$IMAGE" http://localhost:5000/classify
-echo 
+#IMAGE="/media/mike/HD/our_dataset_verification/Random/Random.jpg"
+
+function request {
+  image=$1
+  echo $image
+  curl -F "image=@$image" http://localhost:5000/classify
+  echo 
+}
+export -f request
+
+#find /media/mike/HD/our_dataset_verification/ -type f -exec bash -c 'request "$0"' "{}" \;
+find test/ -type f -exec bash -c 'request "$0"' "{}" \;
