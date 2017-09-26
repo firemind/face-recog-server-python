@@ -6,7 +6,7 @@ Install [Docker](https://www.docker.com/community-edition)
 
 ## Configure
 
-Change in config.sh `FACE\_DATASET` to your dataset location
+Change in `config.sh` `FACE_DATASET` to your dataset location
 
 ## Install & run
 
