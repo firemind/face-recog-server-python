@@ -18,7 +18,8 @@ from sklearn.svm import SVC
 from scipy import misc
 
 IMAGE_FOLDER = "/images"
-UPLOAD_FOLDER = '/tmp/flask-uploads'
+TMP_FOLDER = '/tmp/flask-uploads'
+STORE_FOLDER = '/store'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -28,9 +29,9 @@ def allowed_file(filename):
 
 
 app = Flask(__name__)
-if not os.path.isdir(UPLOAD_FOLDER):
-  os.makedirs(UPLOAD_FOLDER)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+for d in [IMAGE_FOLDER,TMP_FOLDER,STORE_FOLDER]:
+  if not os.path.isdir(d):
+    os.makedirs(d)
 
 tf.Graph().as_default()
 sess = tf.Session()
@@ -104,7 +105,7 @@ def classify():
   if file and allowed_file(file.filename):
     ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
     random_key = np.random.randint(0, high=99999)
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], ("%05d-classify." % random_key)+ext)
+    image_path = os.path.join(TMP_FOLDER, ("%05d-classify." % random_key)+ext)
     # file.save(image_path)
     image = do_align(misc.imread(file))
     misc.imsave(image_path, image)
@@ -133,6 +134,27 @@ def classify():
                   score= best_class_probabilities[i],
                   image= image_path
                   )
+
+@app.route("/store", methods=['POST'])
+def store():
+  if 'image' not in request.files:
+    flash('No file part')
+    return redirect(request.url)
+  file = request.files['image']
+  label = request.form.get('label')
+  if file.filename == '':
+    flash('No selected file')
+    return redirect(request.url)
+  if file and allowed_file(file.filename):
+    ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
+    random_key = np.random.randint(0, high=99999)
+    file_name = ("%05d-%s.%s" % (random_key, label, ext))
+    base_path = os.path.join(STORE_FOLDER, secure_filename(label))
+    if not os.path.isdir(base_path):
+      os.makedirs(base_path)
+    image_path = os.path.join(base_path, secure_filename(file_name))
+    file.save(image_path)
+    return jsonify(image= image_path)
 
 @app.route('/images/<path:path>')
 def send_image(path):
