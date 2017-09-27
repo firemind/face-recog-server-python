@@ -2,13 +2,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import tensorflow as tf
 import numpy as np
 import argparse
 import facenet
 import os
+import random
 import sys
 import math
 import pickle
@@ -16,6 +17,7 @@ import align.detect_face
 from sklearn.svm import SVC
 from scipy import misc
 
+IMAGE_FOLDER = "/images"
 UPLOAD_FOLDER = '/tmp/flask-uploads'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
@@ -119,8 +121,22 @@ def classify():
     best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
 
     for i in range(len(best_class_indices)):
-      return ('%4d  %s: %.3f' % (i, class_names[best_class_indices[i]], best_class_probabilities[i]))
+      if os.path.isdir(IMAGE_FOLDER):
+        class_dir = os.path.join(IMAGE_FOLDER, class_names[best_class_indices[i]])
+        if os.path.isdir(class_dir):
+          image="/images/"+class_names[best_class_indices[i]]+"/"+random.choice(os.listdir(class_dir)) 
+      else:
+        image=None
 
+      return jsonify(
+                  label= class_names[best_class_indices[i]], 
+                  score= best_class_probabilities[i],
+                  image=image
+                  )
+
+@app.route('/images/<path:path>')
+def send_image(path):
+  return send_from_directory('/images', path)
 
 def main():
   global model
