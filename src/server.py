@@ -124,14 +124,14 @@ def classify():
       if os.path.isdir(IMAGE_FOLDER):
         class_dir = os.path.join(IMAGE_FOLDER, class_names[best_class_indices[i]])
         if os.path.isdir(class_dir):
-          image="/images/"+class_names[best_class_indices[i]]+"/"+random.choice(os.listdir(class_dir)) 
+          image_path="/images/"+class_names[best_class_indices[i]]+"/"+random.choice(os.listdir(class_dir)) 
       else:
-        image=None
+        image_path=""
 
       return jsonify(
                   label= class_names[best_class_indices[i]], 
                   score= best_class_probabilities[i],
-                  image=image
+                  image= image_path
                   )
 
 @app.route('/images/<path:path>')
