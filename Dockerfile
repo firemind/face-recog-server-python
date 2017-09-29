@@ -12,5 +12,6 @@ RUN pip install flask opencv-python
 
 COPY entrypoint.sh /
 WORKDIR /app
+COPY . ./
 
 ENTRYPOINT "/entrypoint.sh"
