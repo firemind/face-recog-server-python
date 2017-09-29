@@ -14,4 +14,6 @@ COPY entrypoint.sh /
 WORKDIR /app
 COPY ./src ./
 
+EXPOSE 5000
+
 ENTRYPOINT "/entrypoint.sh"
