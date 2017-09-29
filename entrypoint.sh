@@ -1,1 +1,1 @@
-python /facenet/server.py
+python /app/server.py
