@@ -193,7 +193,7 @@ def parse_arguments(argv):
   parser.add_argument('--classifier_filename',
                       help='Classifier model file name as a pickle (.pkl) file. ' +
                            'For training this is the output and for classification this is an input.',
-                      default="/facenet/model.pb")
+                      default="/svm-model/model.pkl")
   parser.add_argument('--batch_size', type=int,
                       help='Number of images to process in a batch.', default=90)
   parser.add_argument('--image_size', type=int,

@@ -11,5 +11,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends libopencv-dev l
 RUN pip install flask opencv-python
 
 COPY entrypoint.sh /
+WORKDIR /app
 
 ENTRYPOINT "/entrypoint.sh"

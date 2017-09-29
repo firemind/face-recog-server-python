@@ -79,7 +79,7 @@ def parse_arguments(argv):
 	help='Could be either a directory containing the meta_file and ckpt_file or a model protobuf (.pb) file', default="/base-model")
     parser.add_argument('--classifier_filename', 
         help='Classifier model file name as a pickle (.pkl) file. ' + 
-	    'For training this is the output and for classification this is an input.', default="/facenet/model.pb")
+	    'For training this is the output and for classification this is an input.', default="/svm-model/model.pkl")
     parser.add_argument('--use_split_dataset', 
         help='Indicates that the dataset specified by data_dir should be split into a training and test set. ' +  
         'Otherwise a separate test set can be specified using the test_data_dir option.', action='store_true')
