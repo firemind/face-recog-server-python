@@ -62,7 +62,7 @@ def classify():
 
     label, score = face_mind.classify(image_path)
     if os.path.isdir(IMAGE_FOLDER):
-      class_dir = os.path.join(IMAGE_FOLDER, )
+      class_dir = os.path.join(IMAGE_FOLDER, label)
       if os.path.isdir(class_dir):
         path = base64.b64encode(label+"/"+random.choice(os.listdir(class_dir)))
         image_path="/images/"+ path
@@ -101,6 +101,7 @@ def store():
 @app.route('/images/<path:path>')
 def send_image(path):
   path = base64.b64decode(path)
+  print(path)
   return send_from_directory('/images', path)
 
 def main():
