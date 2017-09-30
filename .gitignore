@@ -3,3 +3,5 @@
 !/tmp/.keep
 /store/*
 !/store/.keep
+/svm-model/*
+!/svm-model/.keep

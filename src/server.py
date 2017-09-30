@@ -16,6 +16,7 @@ import pickle
 import align.detect_face
 from sklearn.svm import SVC
 from scipy import misc
+import base64
 
 IMAGE_FOLDER = "/images"
 TMP_FOLDER = '/tmp/flask-uploads'
@@ -48,8 +49,6 @@ def do_align(img):
   threshold = [0.6, 0.7, 0.7]  # three steps's threshold
   factor = 0.709  # scale factor
 
-
-  nrof_images_total = 0
   nrof_successfully_aligned = 0
 
   if img.ndim < 2:
@@ -106,14 +105,14 @@ def classify():
     ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
     random_key = np.random.randint(0, high=99999)
     image_path = os.path.join(TMP_FOLDER, ("%05d-classify." % random_key)+ext)
-    # file.save(image_path)
-    image = do_align(misc.imread(file))
+    image = misc.imread(file)
+    if request.form.get("align") == "true":
+      image = do_align(image)
     misc.imsave(image_path, image)
     # Get input and output tensors
     images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
     embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
     phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
-    embedding_size = embeddings.get_shape()[1]
     images = facenet.load_data([image_path], False, False, args.image_size)
     feed_dict = {images_placeholder: images, phase_train_placeholder: False}
     emb_array = sess.run(embeddings, feed_dict=feed_dict)
@@ -125,7 +124,8 @@ def classify():
       if os.path.isdir(IMAGE_FOLDER):
         class_dir = os.path.join(IMAGE_FOLDER, class_names[best_class_indices[i]])
         if os.path.isdir(class_dir):
-          image_path="/images/"+class_names[best_class_indices[i]]+"/"+random.choice(os.listdir(class_dir)) 
+          path = base64.b64encode(class_names[best_class_indices[i]]+"/"+random.choice(os.listdir(class_dir)))
+          image_path="/images/"+ path
       else:
         image_path=""
 
@@ -158,6 +158,7 @@ def store():
 
 @app.route('/images/<path:path>')
 def send_image(path):
+  path = base64.b64decode(path)
   return send_from_directory('/images', path)
 
 def main():

@@ -5,7 +5,7 @@ source $PWD/config.sh
 function request {
   image=$1
   echo $image
-  curl -F "image=@$image" $SERVER_URL/classify
+  curl -F "image=@$image" -F "align=true" $SERVER_URL/classify 
   echo 
 }
 export -f request
