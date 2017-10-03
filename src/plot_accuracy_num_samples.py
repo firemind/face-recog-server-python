@@ -2,8 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-#from Tkinter import *
-#import matplotlib.pyplot as plt
+from Tkinter import *
+import matplotlib.pyplot as plt
 import pickle
 from sklearn.svm import SVC
 import random
@@ -46,10 +46,10 @@ def main():
         prediction, score = res[i]
         if prediction == face_mind.class_names[labels[i]]:
           correct += 1
-        else:
-          print("wrong %s != %s" % (prediction, face_mind.class_names[labels[i]]))
 
-      print("Accuracy for %i: %f" % (test_size, correct/len(res)))
+      acc = correct/len(res)
+      print("Accuracy for %i: %f" % (test_size, acc))
+      results.append(acc)
       #accuracy = np.mean(np.equal(best_class_indices, labels))
 
       #indices = random.sample(, test_size-1)
@@ -63,8 +63,11 @@ def main():
       #results.append(time.time()-start)
 
 
-    #plt.plot(test_sizes, results, 'ro')
-    #plt.show()
+    print("|Num Samples| "+" | ".join(map(str,test_sizes))+"|")
+    print("|-----------|"+"---|"*len(test_sizes))
+    print("| Accuracy  | "+" | ".join(map(str,results))+"|")
+    plt.plot(test_sizes, results, 'ro')
+    plt.show()
 
 def split_dataset(dataset, min_nrof_images_per_class, nrof_train_images_per_class):
   train_set = []
