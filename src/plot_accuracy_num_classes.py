@@ -24,14 +24,14 @@ def main():
   global sess
   with sess as sess:
     np.random.seed(seed=1234)
-    max_samples=10
+    num_samples=10
     verify_on=10
     face_mind.load_model(args.model)
-    test_sizes = range(1, max_samples+1)
+    test_sizes = [2,3,4,5,10,15,20,30,40,50,60,70]
     results = []
     dataset = facenet.get_dataset(args.data_dir)
     for test_size in test_sizes:
-      train_set, test_set = split_dataset(dataset, test_size+verify_on, test_size)
+      train_set, test_set = split_dataset(dataset, verify_on, num_samples, test_size)
       face_mind.train_on_dataset(train_set)
       paths, labels = facenet.get_image_paths_and_labels(test_set)
       print("Verifying on %i paths" % len(paths))
@@ -46,22 +46,27 @@ def main():
       print("Accuracy for %i: %f" % (test_size, acc))
       results.append(acc)
 
-    print("|Num Samples| "+" | ".join(map(str,test_sizes))+"|")
+    print("|Num Classes| "+" | ".join(map(str,test_sizes))+"|")
     print("|-----------|"+"---|"*len(test_sizes))
     print("| Accuracy  | "+" | ".join(map(str,results))+"|")
     plt.plot(test_sizes, results, 'ro')
     plt.show()
 
-def split_dataset(dataset, min_nrof_images_per_class, nrof_train_images_per_class):
+def split_dataset(dataset, nrof_varification_images_per_class, nrof_train_images_per_class, nrof_classes):
   train_set = []
   test_set = []
+  classes_added=0
   for cls in dataset:
     paths = cls.image_paths
     # Remove classes with less than min_nrof_images_per_class
-    if len(paths)>=min_nrof_images_per_class:
+    if len(paths)>=nrof_varification_images_per_class+nrof_train_images_per_class:
       np.random.shuffle(paths)
       train_set.append(facenet.ImageClass(cls.name, paths[:nrof_train_images_per_class]))
-      test_set.append(facenet.ImageClass(cls.name, paths[nrof_train_images_per_class:min_nrof_images_per_class]))
+      test_set.append(facenet.ImageClass(cls.name, paths[nrof_train_images_per_class:(nrof_train_images_per_class+nrof_varification_images_per_class)]))
+      classes_added+=1
+      if classes_added >= nrof_classes:
+        break
+  print("Train set %i and Test set %i" % (len(train_set), len(test_set)))
   return train_set, test_set
 
 def parse_arguments(argv):
