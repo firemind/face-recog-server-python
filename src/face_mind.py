@@ -27,12 +27,21 @@ class FaceMind:
     self.embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
     self.phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
 
-  def load_classifier(self, classifier_filename):
+  def save_classifier(self, classifier_filename_exp):
+    print('Saving classifier model to file "%s"' % classifier_filename_exp)
+    with open(classifier_filename_exp, 'wb') as outfile:
+      #pickle.dump((model, class_names), outfile)
+      pickle.dump((self.emb_array, self.labels, self.class_names), outfile)
 
-    classifier_filename_exp = os.path.expanduser(classifier_filename)
+  def load_classifier(self, classifier_filename_exp):
+
+    classifier_filename_exp = os.path.expanduser(classifier_filename_exp)
     print('Loaded classifier model from file "%s"' % classifier_filename_exp)
     with open(classifier_filename_exp, 'rb') as infile:
-      (self.model, self.class_names) = pickle.load(infile)
+      #(self.model, self.class_names) = pickle.load(infile)
+      (self.emb_array, self.labels, self.class_names) = pickle.load(infile)
+    self.model = SVC(kernel='linear', probability=True)
+    self.fit()
 
   def classify(self, image_path):
     # Get input and output tensors
@@ -50,7 +59,9 @@ class FaceMind:
       i = self.class_names.index(label)
     except ValueError:
       i = len(self.class_names)
+      print("First time seeing: "+label)
       self.class_names.append(label)
+    print("%s is at %d" % (label, i))
 
     self.labels.append(i)
     images = facenet.load_data([image_path], False, False, self.image_size)
@@ -60,6 +71,7 @@ class FaceMind:
     self.fit()
 
   def train(self, data_dir):
+    print('Training classifier model from path "%s"' % data_dir)
     batch_size = 90
     embedding_size = self.embeddings.get_shape()[1]
 

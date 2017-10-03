@@ -3,10 +3,10 @@ source $PWD/config.sh
 #IMAGE="/media/mike/HD/our_dataset_verification/Random/Random.jpg"
 
 function request {
-  NAME="Özgöl Umkéléler"
+  NAME="Alissa White-Gluz"
   image=$1
   echo $image
-  curl -F "image=@$image" -F "label=$NAME" $SERVER_URL/store
+  curl -F "image=@$image" -F "label=$NAME" -F "align=true" $SERVER_URL/store
   echo 
 }
 export -f request

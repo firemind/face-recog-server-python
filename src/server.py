@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from flask import Flask, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, request, redirect, url_for, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 import tensorflow as tf
 import numpy as np
@@ -16,6 +16,11 @@ import align.detect_face
 from sklearn.svm import SVC
 from scipy import misc
 import base64
+# encoding=utf8
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 IMAGE_FOLDER = "/images"
 TMP_FOLDER = '/tmp/flask-uploads'
@@ -61,18 +66,12 @@ def classify():
     misc.imsave(image_path, image)
 
     label, score = face_mind.classify(image_path)
-    if os.path.isdir(IMAGE_FOLDER):
-      class_dir = os.path.join(IMAGE_FOLDER, label)
-      if os.path.isdir(class_dir):
-        path = base64.b64encode(label+"/"+random.choice(os.listdir(class_dir)))
-        image_path="/images/"+ path
-    else:
-      image_path=""
+
 
     return jsonify(
                 label= label,
                 score= score,
-                image= image_path
+                image= random_image_url_for(label)
                 )
 
 @app.route("/store", methods=['POST'])
@@ -94,8 +93,12 @@ def store():
     if not os.path.isdir(base_path):
       os.makedirs(base_path)
     image_path = os.path.join(base_path, secure_filename(file_name))
-    file.save(image_path)
+    image = misc.imread(file)
+    if request.form.get("align") == "true":
+      image = face_mind.align(image)
+    misc.imsave(image_path, image)
     face_mind.store(image_path, secure_filename(label))
+    face_mind.save_classifier(args.classifier_filename)
     return jsonify(image= image_path)
 
 @app.route('/images/<path:path>')
@@ -104,14 +107,31 @@ def send_image(path):
   print(path)
   return send_from_directory('/images', path)
 
+@app.route('/classes')
+def index_classes():
+  return render_template('classes.html', classes=map(lambda i: [face_mind.class_names[i], face_mind.labels.count(i), random_image_url_for(face_mind.class_names[i])], range(0, len(face_mind.class_names))))
+
+
+def random_image_url_for(label):
+  image_url_path=""
+  if os.path.isdir(IMAGE_FOLDER):
+    class_dir = os.path.join(IMAGE_FOLDER, label)
+    if os.path.isdir(class_dir):
+      path = base64.b64encode(label+"/"+random.choice(os.listdir(class_dir)))
+      image_url_path="/images/"+ path
+  return image_url_path
+
 def main():
   global sess
   with sess as sess:
     np.random.seed(seed=args.seed)
 
     face_mind.load_model(args.model)
-    # face_mind.load_classifier(args.classifier_filename)
-    face_mind.train(args.data_dir)
+    if os.path.isfile(args.classifier_filename):
+      face_mind.load_classifier(args.classifier_filename)
+    else:
+      face_mind.train(args.data_dir)
+      face_mind.save_classifier(args.classifier_filename)
 
     app.run(host="0.0.0.0")
 
