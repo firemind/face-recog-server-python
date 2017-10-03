@@ -1,8 +1,9 @@
 # Face Recognition Server
 
-![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/face_recog_server.png Architecture)
+![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/face_recog_server.png "Architecture")
 
-![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/SVM_fitting_time.png.png "SVM Fitting Times")
+# SVM Fitting Times
+![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/SVM_fitting_time.png "SVM Fitting Times")
 
 ## Requirements
 Install [Git LFS](https://git-lfs.github.com/)
