@@ -1,6 +1,12 @@
 #!/bin/bash
 source $PWD/config.sh
 
+OPTIONS="-p 5000:5000"
+if [ ! -z $1 ] ; then
+  OPTIONS="--entrypoint python"
+fi
+echo $OPTIONS
+
 docker run --rm -it \
   -v $SVM_MODEL:/svm-model/ \
   -v $PWD/tmp:/tmp/ \
@@ -9,4 +15,4 @@ docker run --rm -it \
   -v $FACE_DATASET:/face-data \
   -v $FACENET_MODEL:/base-model \
   -v $PWD/src:/app \
-  -p 5000:5000 facenet-rest-server
+  $OPTIONS facenet-rest-server $1

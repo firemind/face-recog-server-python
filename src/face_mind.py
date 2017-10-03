@@ -44,15 +44,17 @@ class FaceMind:
     self.fit()
 
   def classify(self, image_path):
+    return classify_all([image_path])[0]
+
+  def classify_all(self, image_paths):
     # Get input and output tensors
-    images = facenet.load_data([image_path], False, False, self.image_size)
+    images = facenet.load_data(image_paths, False, False, self.image_size)
     feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
     emb_array = self.sess.run(self.embeddings, feed_dict=feed_dict)
     predictions = self.model.predict_proba(emb_array)
     best_class_indices = np.argmax(predictions, axis=1)
     best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
-    for i in range(len(best_class_indices)):
-      return self.class_names[best_class_indices[i]], best_class_probabilities[i]
+    return map(lambda i: [self.class_names[best_class_indices[i]], best_class_probabilities[i]], range(len(best_class_indices)))
 
   def store(self, image_path, label):
     try:
@@ -70,14 +72,13 @@ class FaceMind:
     self.emb_array = np.append(self.emb_array, res, axis=0)
     self.fit()
 
-  def train(self, data_dir):
-    print('Training classifier model from path "%s"' % data_dir)
+  def train_on_dataset(self, dataset):
     batch_size = 90
     embedding_size = self.embeddings.get_shape()[1]
 
-    dataset = facenet.get_dataset(data_dir)
     paths, self.labels = facenet.get_image_paths_and_labels(dataset)
     nrof_images = len(paths)
+    print("Training on %i images" % nrof_images)
     nrof_batches_per_epoch = int(math.ceil(1.0 * nrof_images / batch_size))
     self.emb_array = np.zeros((nrof_images, embedding_size))
     for i in range(nrof_batches_per_epoch):
@@ -91,8 +92,13 @@ class FaceMind:
     self.class_names = [cls.name.replace('_', ' ') for cls in dataset]
     self.fit()
 
+  def train(self, data_dir):
+    print('Training classifier model from path "%s"' % data_dir)
+    dataset = facenet.get_dataset(data_dir)
+    train_on_dataset(dataset)
+
   def fit(self):
-    print(len(self.emb_array))
+    print("Fitting %i samples" % len(self.emb_array))
     self.model.fit(self.emb_array, self.labels)
 
   def align(self, img):

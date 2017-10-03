@@ -17,7 +17,6 @@ from sklearn.svm import SVC
 from scipy import misc
 import base64
 # encoding=utf8
-import sys
 
 reload(sys)
 sys.setdefaultencoding('utf8')
