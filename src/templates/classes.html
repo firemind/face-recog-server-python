@@ -1,0 +1,16 @@
+<!doctype html>
+<title>Classes the server knows about</title>
+<table>
+  <tr>
+    <th>Class</th>
+    <th>Num Samples</th>
+    <th>Picture</th>
+  </tr>
+  {% for cls in classes %}
+    <tr>
+      <td>{{ cls[0] }}</td>
+      <td>{{ cls[1] }}</td>
+      <td><img src="{{ cls[2] }}" /></td>
+    </tr>
+  {% endfor %}
+</table>
