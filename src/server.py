@@ -16,6 +16,8 @@ import align.detect_face
 from sklearn.svm import SVC
 from scipy import misc
 import base64
+import datetime
+import csv
 # encoding=utf8
 
 reload(sys)
@@ -24,6 +26,7 @@ sys.setdefaultencoding('utf8')
 IMAGE_FOLDER = "/images"
 TMP_FOLDER = '/tmp/flask-uploads'
 STORE_FOLDER = '/store'
+LOG_FILE = '/face.log'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -41,6 +44,7 @@ tf.Graph().as_default()
 sess = tf.Session()
 
 face_mind = FaceMind(sess)
+classification_log = []
 
 @app.route("/classify", methods=['POST'])
 def classify():
@@ -57,7 +61,8 @@ def classify():
   if file and allowed_file(file.filename):
     ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
     random_key = np.random.randint(0, high=99999)
-    image_path = os.path.join(TMP_FOLDER, ("%05d-classify." % random_key)+ext)
+    image_name=("%05d-classify." % random_key)+ext
+    image_path = os.path.join(TMP_FOLDER, image_name)
     image = misc.imread(file)
     if request.form.get("align") == "true":
       image = face_mind.align(image)
@@ -66,12 +71,24 @@ def classify():
 
     label, score = face_mind.classify(image_path)
 
+    log_classification([
+      "/tmp_images/"+base64.b64encode(image_name),
+      label,
+      score,
+      datetime.datetime.now()
+    ])
 
     return jsonify(
                 label= label,
                 score= score,
                 image= random_image_url_for(label)
                 )
+
+def log_classification(fields):
+  with open(LOG_FILE, 'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(fields)
+
 
 @app.route("/store", methods=['POST'])
 def store():
@@ -106,10 +123,23 @@ def send_image(path):
   print(path)
   return send_from_directory('/images', path)
 
+@app.route('/tmp_images/<path:path>')
+def send_tmp_image(path):
+  path = base64.b64decode(path)
+  print(path)
+  return send_from_directory(TMP_FOLDER, path)
+
 @app.route('/classes')
 def index_classes():
   return render_template('classes.html', classes=map(lambda i: [face_mind.class_names[i], face_mind.labels.count(i), random_image_url_for(face_mind.class_names[i])], range(0, len(face_mind.class_names))))
 
+@app.route('/log')
+def index_log():
+  classification_log=None
+  with open(LOG_FILE, 'rb') as f:
+    reader = csv.reader(f)
+    classification_log= list(reader)
+  return render_template('log.html', entries=classification_log)
 
 def random_image_url_for(label):
   image_url_path=""

@@ -95,7 +95,7 @@ class FaceMind:
   def train(self, data_dir):
     print('Training classifier model from path "%s"' % data_dir)
     dataset = facenet.get_dataset(data_dir)
-    train_on_dataset(dataset)
+    self.train_on_dataset(dataset)
 
   def fit(self):
     print("Fitting %i samples" % len(self.emb_array))

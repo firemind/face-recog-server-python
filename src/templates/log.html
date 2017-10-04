@@ -1,0 +1,18 @@
+<!doctype html>
+<title>Classification Log</title>
+<table>
+  <tr>
+    <th>Picture</th>
+    <th>label</th>
+    <th>score</th>
+    <th>time</th>
+  </tr>
+  {% for cls in entries %}
+    <tr>
+      <td><img src="{{ cls[0] }}" /></td>
+      <td>{{ cls[1] }}</td>
+      <td>{{ cls[2] }}</td>
+      <td>{{ cls[3] }}</td>
+    </tr>
+  {% endfor %}
+</table>
