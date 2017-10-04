@@ -44,7 +44,7 @@ class FaceMind:
     self.fit()
 
   def classify(self, image_path):
-    return classify_all([image_path])[0]
+    return self.classify_all([image_path])[0]
 
   def classify_all(self, image_paths):
     # Get input and output tensors
