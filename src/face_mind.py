@@ -102,6 +102,7 @@ class FaceMind:
     self.model.fit(self.emb_array, self.labels)
 
   def align(self, img):
+    print("doing alignment")
     minsize = 20  # minimum size of face
     threshold = [0.6, 0.7, 0.7]  # three steps's threshold
     factor = 0.709  # scale factor
