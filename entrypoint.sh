@@ -1,1 +1,1 @@
-python /app/server.py
+python -u /app/server.py
