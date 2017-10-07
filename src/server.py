@@ -115,7 +115,7 @@ def store():
     misc.imsave(image_path, image)
     face_mind.store(image_path, secure_filename(label))
     face_mind.save_classifier(args.classifier_filename)
-    return jsonify(image= image_path)
+    return jsonify(image= random_image_url_for(label))
 
 @app.route('/images/<path:path>')
 def send_image(path):
