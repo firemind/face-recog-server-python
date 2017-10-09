@@ -6,6 +6,7 @@ from Tkinter import *
 import matplotlib.pyplot as plt
 import pickle
 from sklearn.svm import SVC
+from sklearn import linear_model
 import random
 import time
 import tensorflow as tf
@@ -20,6 +21,8 @@ sess = tf.Session()
 
 face_mind = FaceMind(sess)
 
+loss_types =['log', 'modified_huber']
+
 def main():
   global sess
   with sess as sess:
@@ -29,11 +32,13 @@ def main():
     face_mind.load_model(args.model)
     test_sizes = range(1, max_samples+1)
     results = []
+    results_all = {}
     dataset = facenet.get_dataset(args.data_dir)
     for test_size in test_sizes:
       train_set, test_set = split_dataset(dataset, test_size+verify_on, test_size)
       face_mind.train_on_dataset(train_set)
       paths, labels = facenet.get_image_paths_and_labels(test_set)
+      # SVM model fitting
       print("Verifying on %i paths" % len(paths))
       res = face_mind.classify_all(paths)
       correct = 0.0
@@ -46,10 +51,26 @@ def main():
       print("Accuracy for %i: %f" % (test_size, acc))
       results.append(acc)
 
-    print("|Num Samples| "+" | ".join(map(str,test_sizes))+"|")
-    print("|-----------|"+"---|"*len(test_sizes))
-    print("| Accuracy  | "+" | ".join(map(str,results))+"|")
-    plt.plot(test_sizes, results, 'ro')
+      for t in loss_types:
+        # linear model fitting
+        face_mind.model = linear_model.SGDClassifier(loss=t)
+        face_mind.fit()
+        res = face_mind.classify_all(paths)
+        correct = 0.0
+        for i in range(0,len(res)):
+          prediction, score = res[i]
+          if prediction == face_mind.class_names[labels[i]]:
+            correct += 1
+        acc = correct/len(res)
+        results_all.setdefault(t, [])
+        results_all[t].append(acc)
+
+    print("|Num Samples   | "+" | ".join(map(str,test_sizes))+"|")
+    print("|--------------|"+"---|"*len(test_sizes))
+    print("| Accuracy SVM | "+" | ".join(map(str,results))+"|")
+    print("| Accuracy LOG | "+" | ".join(map(str,results_all['log']))+"|")
+    print("| Accuracy HUB | "+" | ".join(map(str,results_all['modified_huber']))+"|")
+    plt.plot(test_sizes, results, 'ro', test_sizes, results_all['log'], 'bo', test_sizes, results_all['modified_huber'], 'go')
     plt.show()
 
 def split_dataset(dataset, min_nrof_images_per_class, nrof_train_images_per_class):
