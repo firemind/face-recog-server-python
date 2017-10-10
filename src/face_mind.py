@@ -5,7 +5,8 @@ from scipy import misc
 import os
 import pickle
 import tensorflow as tf
-from sklearn.svm import SVC
+# from sklearn.svm import SVC
+from sklearn import linear_model
 import math
 
 class FaceMind:
@@ -88,7 +89,8 @@ class FaceMind:
       images = facenet.load_data(paths_batch, False, False, self.image_size)
       feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
       self.emb_array[start_index:end_index, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
-    self.model = SVC(kernel='linear', probability=True)
+    # self.model = SVC(kernel='linear', probability=True)
+    self.model = linear_model.SGDClassifier(loss='log')
     self.class_names = [cls.name.replace('_', ' ') for cls in dataset]
     self.fit()
 

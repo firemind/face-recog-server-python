@@ -4,6 +4,7 @@ from __future__ import print_function
 
 from Tkinter import *
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import pickle
 from sklearn.svm import SVC
 from sklearn import linear_model
@@ -70,6 +71,10 @@ def main():
     print("| Accuracy SVM | "+" | ".join(map(str,results))+"|")
     print("| Accuracy LOG | "+" | ".join(map(str,results_all['log']))+"|")
     print("| Accuracy HUB | "+" | ".join(map(str,results_all['modified_huber']))+"|")
+    red_patch = mpatches.Patch(color='red', label='SVC (Facenet)')
+    blue_patch = mpatches.Patch(color='blue', label='SGD (Log)')
+    green_patch = mpatches.Patch(color='green', label='SGD (Modified Huber)')
+    plt.legend(handles=[red_patch, blue_patch,green_patch])
     plt.plot(test_sizes, results, 'ro', test_sizes, results_all['log'], 'bo', test_sizes, results_all['modified_huber'], 'go')
     plt.show()
 
