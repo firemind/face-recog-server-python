@@ -41,7 +41,7 @@ class FaceMind:
     with open(classifier_filename_exp, 'rb') as infile:
       #(self.model, self.class_names) = pickle.load(infile)
       (self.emb_array, self.labels, self.class_names) = pickle.load(infile)
-    self.model = SVC(kernel='linear', probability=True)
+    self._set_model()
     self.fit()
 
   def classify(self, image_path):
@@ -89,10 +89,14 @@ class FaceMind:
       images = facenet.load_data(paths_batch, False, False, self.image_size)
       feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
       self.emb_array[start_index:end_index, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
-    # self.model = SVC(kernel='linear', probability=True)
-    self.model = linear_model.SGDClassifier(loss='log')
+    self._set_model()
     self.class_names = [cls.name.replace('_', ' ') for cls in dataset]
     self.fit()
+
+  def _set_model(self):
+    # self.model = SVC(kernel='linear', probability=True)
+    self.model = linear_model.SGDClassifier(loss='log')
+
 
   def train(self, data_dir):
     print('Training classifier model from path "%s"' % data_dir)
