@@ -1,98 +1,20 @@
 import os
-import json
-import cognitive_face as CF
-import time
-
-import math
+from face_api import FaceAPI
 from cognitive_face import CognitiveFaceException
-from itertools import islice
 
 FACE_PATH = '/home/viruch/Documents/projects/SA/PersonalFaceData/'
-trainFaces = 7
-testFaces = 3
-PERSON_SIZE = 10
-
-class FaceAPI:
-    CALL_LIMIT_PER_MINUTE = 20
-    IDENTIFY_FACE_LIMIT = 10
-
-    KEY = '8ee57766bc6040b98a1be5ec498e705f'  # Replace with a valid subscription key (keeping the quotes in place).
-    CF.Key.set(KEY)
-
-    BASE_URL = 'https://westeurope.api.cognitive.microsoft.com/face/v1.0/'
-    CF.BaseUrl.set(BASE_URL)
-
-    def __init__(self, group_id):
-        self.group_id = group_id
-
-    def __cache(self, file_path, call):
-        cache_file = file_path + ".json"
-        if os.path.isfile(cache_file):
-            with open(cache_file, 'r') as f:
-                result = json.load(f)
-        else:
-            result = call()
-            with open(cache_file, 'w') as f:
-                json.dump(result, f)
-        return result
-
-    def wait(self, return_value):
-        time.sleep(4)
-        return return_value
-
-    def detect_face(self, image_path):
-        return self.__cache(image_path,
-                            lambda: self.wait(CF.face.detect(image_path)))
-
-    def create_person_group(self):
-        return self.wait(CF.person_group.create(self.group_id))
-
-    def create_person(self, root, dirname):
-        return self.__cache(os.path.join(root, dirname),
-                            lambda: self.wait(CF.person.create(self.group_id, dirname)))
-
-
-    def train(self):
-        CF.person_group.train(self.group_id)
-        while True:
-            result = self.wait(CF.person_group.get_status(self.group_id))
-            print result
-            if result["status"] == "succeeded":
-                return
-
-    def reset(self):
-        try:
-            self.wait(CF.person_group.delete(self.group_id))
-        except:
-            print("could not delete Person Group!")
-            pass
-
-    def addFace(self, imagePath, personId, target_face):
-        return self.__cache(imagePath,
-                         lambda: self.wait(CF.person.add_face(imagePath, self.group_id, personId, target_face=target_face)))
-
-    def list(self):
-        return self.wait(CF.person.lists(self.group_id))
-
-    def identify(self, faceIds):
-        results = []
-        for i in range(int(math.ceil(float(len(faceIds)) / FaceAPI.IDENTIFY_FACE_LIMIT))):
-            results.extend(
-                self.wait(
-                    CF.face.identify(faceIds[i * FaceAPI.IDENTIFY_FACE_LIMIT:(i + 1) * FaceAPI.IDENTIFY_FACE_LIMIT],
-                                     self.group_id)))
-        return results
-
+max_test_sample_size = 7
+verify_sample_size = 3
 
 faceAPI = FaceAPI('my_group')
 
 def getFiles(dirname):
     return sorted([FACE_PATH + dirname + "/" + f
-                   for f in os.listdir(FACE_PATH + dirname)
+                   for f in os.listdir(os.path.join(FACE_PATH, dirname))
                    if not f.endswith(".json")])
 
 
-def detectFace(absoluteName):
+def extract_rectangle_from_face(absoluteName):
     result = faceAPI.detect_face(absoluteName)
     rectangles = [x["faceRectangle"] for x in result]
     faces = sorted(rectangles, key=lambda x: x["width"] * x["height"])
@@ -103,36 +25,37 @@ def detectFace(absoluteName):
     return ",".join(map(str, [face["left"], face["top"], face["width"], face["height"]]))
 
 
-def get_all_faces():
-    for dirname in sorted(os.listdir(FACE_PATH)):
-        if dirname.endswith(".json"):
+def split_data_set(test_sample_size, verify_sample_size):
+    test_set = []
+    verify_set = []
+    for dirname in sorted([p for p in os.listdir(FACE_PATH)
+                           if not p.endswith(".json")]):
+        files = getFiles(dirname)
+        if len(files) < test_sample_size + verify_sample_size:
+            print dirname + " has not enough samples: " + str(len(files))
             continue
-        faces = getFiles(dirname)
-        if len(faces) < trainFaces + testFaces:
-            print dirname + " has not enough samples: " + str(len(faces))
-            continue
-        yield dirname, faces
+        verify_set.append((dirname, files[:verify_sample_size]))
+        test_set.append((dirname, files[verify_sample_size:verify_sample_size+test_sample_size]))
+    return test_set, verify_set
 
-def getPersonFaces():
-    return islice(get_all_faces(), PERSON_SIZE)
 
-def upload():
+def upload(test_set):
     try:
         faceAPI.create_person_group()
     except CognitiveFaceException:
+        print "failed to create group: " + faceAPI.group_id
         pass
 
-    for dirname, faces in getPersonFaces():
-        result = faceAPI.create_person(FACE_PATH, dirname)
-        print(result)
-        personId = result["personId"]
-        trains = faces[:trainFaces]
-        for absoluteName in trains:
-            target_face = detectFace(absoluteName)
+    for dirname, test_files in test_set:
+        person = faceAPI.create_person(FACE_PATH, dirname)
+        personId = person["personId"]
+        print("person %s: %s" % (dirname, personId))
+        for absoluteName in test_files:
+            target_face = extract_rectangle_from_face(absoluteName)
             if target_face is None:
                 continue
-            print(faceAPI.addFace(absoluteName, personId, target_face))
-            time.sleep(4)
+            faceAPI.addFace(absoluteName, personId, target_face)
+            print("adding %s in %s to %s: %s" % (os.path.basename(absoluteName), target_face, dirname, personId))
 
 
 def showServerContent():
@@ -140,49 +63,50 @@ def showServerContent():
     for p in people:
         print p["name"] + ": " + str(len(p["persistedFaceIds"])) + ":" + p["personId"]
 
-def verify():
+
+def verify(verify_set):
     verify_faces = {}
 
-    for dirname, faces in getPersonFaces():
-        tests = faces[trainFaces: trainFaces + testFaces]
+    for dirname, tests in verify_set:
         for absoluteName in tests:
             result = faceAPI.detect_face(absoluteName)
             if len(result) == 0:
                 print "no face found: " + absoluteName
                 continue
-            currentFace = {
+            verify_faces[result[0]["faceId"]] = {
                 "fileName": absoluteName,
-                "person":  dirname,
+                "person": dirname,
+                "personId": faceAPI.create_person(FACE_PATH, dirname)["personId"]
             }
-            with open(FACE_PATH + dirname + '.json', 'r') as outfile:
-                currentFace["personId"] = json.load(outfile)["personId"]
-
-            verify_faces[result[0]["faceId"]] = currentFace
 
     results = faceAPI.identify(verify_faces.keys())
 
-    correct = 0
-    false = 0
+    correct = 0.0
 
     for r in results:
         face = verify_faces[r["faceId"]]
         predicted = r["candidates"]
         if len(predicted) == 0:
             print("no prediction: " + face["fileName"])
-            false += 1
             continue
         if face["personId"] == predicted[0]["personId"]:
-            correct +=1
+            correct += 1
         else:
-            false += 1
             print("missmatch for: " + face + " predicted: " + predicted)
-    print ("successrate: " + str(float(correct) / float(correct + false)))
+    return correct / len(results)
 
 
+def main():
+    faceAPI.reset(FACE_PATH)
+    for test_sample_size in range(1, max_test_sample_size + 1):
+        test_set, verify_set = split_data_set(test_sample_size, verify_sample_size)
+        upload(test_set)
+        showServerContent()
+        faceAPI.train()
+        successrate = verify(verify_set)
+        print ("test sample size: %i verify sample size: %i successrate: %f" %
+               (test_sample_size, verify_sample_size, successrate))
 
-#faceAPI.reset()
-#upload()
-#faceAPI.train()
-verify()
 
-#showServerContent()
+if __name__ == '__main__':
+    main()
