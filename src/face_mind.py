@@ -1,20 +1,20 @@
-import facenet
-import numpy as np
-from scipy import misc
+import json
+import math
 import os
 import pickle
+
+import numpy as np
 # from sklearn.svm import SVC
 from sklearn import linear_model
-import math
+
+from embedding_service import facenet
+import httplib, urllib
 
 class FaceMind:
   """A simple example class"""
-  i = 12345
-  def __init__(self, sess):
-    with sess.as_default():
-      self.sess = sess
-      self.margin = 44
-      self.image_size = 160
+  def __init__(self):
+    self.margin = 44
+    self.image_size = 160
 
   def save_classifier(self, classifier_filename_exp):
     print('Saving classifier model to file "%s"' % classifier_filename_exp)
@@ -38,12 +38,21 @@ class FaceMind:
   def classify_all(self, image_paths):
     # Get input and output tensors
     images = facenet.load_data(image_paths, False, False, self.image_size)
-    feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
-    emb_array = self.sess.run(self.embeddings, feed_dict=feed_dict)
+    emb_array = self.request_embedding(images)
     predictions = self.model.predict_proba(emb_array)
     best_class_indices = np.argmax(predictions, axis=1)
     best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
     return map(lambda i: [self.class_names[best_class_indices[i]], best_class_probabilities[i]], range(len(best_class_indices)))
+
+  def request_embedding(self, images):
+    params = urllib.urlencode({'images': json.dumps( images.tolist())})
+    conn = httplib.HTTPConnection("embedding-service", 5000)
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+            "Accept": "text/json"}
+    conn.request("POST", "/embed", params, headers)
+    response = conn.getresponse()
+    data = response.read()
+    return json.loads(data)['embedding']
 
   def store(self, image_path, label):
     try:
@@ -56,15 +65,13 @@ class FaceMind:
 
     self.labels.append(i)
     images = facenet.load_data([image_path], False, False, self.image_size)
-    feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
-    res = self.sess.run(self.embeddings, feed_dict=feed_dict)
+    res = self.request_embedding(images)
     self.emb_array = np.append(self.emb_array, res, axis=0)
     self.fit()
 
   def train_on_dataset(self, dataset):
     batch_size = 90
-    embedding_size = self.embeddings.get_shape()[1]
-
+    embedding_size = 128
     paths, self.labels = facenet.get_image_paths_and_labels(dataset)
     nrof_images = len(paths)
     print("Training on %i images" % nrof_images)
@@ -75,8 +82,7 @@ class FaceMind:
       end_index = min((i + 1) * batch_size, nrof_images)
       paths_batch = paths[start_index:end_index]
       images = facenet.load_data(paths_batch, False, False, self.image_size)
-      feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
-      self.emb_array[start_index:end_index, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
+      self.emb_array[start_index:end_index, :] = self.request_embedding(images)
     self._set_model()
     self.class_names = [cls.name.replace('_', ' ') for cls in dataset]
     self.fit()

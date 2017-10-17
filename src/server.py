@@ -4,10 +4,8 @@ from __future__ import print_function
 
 from flask import Flask, request, redirect, url_for, jsonify, send_from_directory, render_template
 from werkzeug.utils import secure_filename
-import tensorflow as tf
 import numpy as np
 import argparse
-import facenet
 import os
 import random
 import sys
@@ -39,10 +37,8 @@ for d in [IMAGE_FOLDER,TMP_FOLDER,STORE_FOLDER]:
   if not os.path.isdir(d):
     os.makedirs(d)
 
-tf.Graph().as_default()
-sess = tf.Session()
 
-face_mind = FaceMind(sess)
+face_mind = FaceMind()
 classification_log = []
 
 @app.route("/classify", methods=['POST'])
@@ -146,17 +142,15 @@ def random_image_url_for(label):
   return image_url_path
 
 def main():
-  global sess
-  with sess as sess:
-    np.random.seed(seed=args.seed)
+  np.random.seed(seed=args.seed)
 
-    if os.path.isfile(args.classifier_filename):
-      face_mind.load_classifier(args.classifier_filename)
-    else:
-      face_mind.train(args.data_dir)
-      face_mind.save_classifier(args.classifier_filename)
+  if os.path.isfile(args.classifier_filename):
+    face_mind.load_classifier(args.classifier_filename)
+  else:
+    face_mind.train(args.data_dir)
+    face_mind.save_classifier(args.classifier_filename)
 
-    app.run(host="0.0.0.0")
+  app.run(host="0.0.0.0")
 
 
 def parse_arguments(argv):

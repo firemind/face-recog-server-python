@@ -6,8 +6,8 @@ from flask import Flask, request, redirect, url_for, jsonify, send_from_director
 import tensorflow as tf
 import argparse
 import sys
-from src.embedding_service.service import Service
-
+from service import Service
+import json
 app = Flask(__name__)
 
 tf.Graph().as_default()
@@ -17,12 +17,12 @@ service = Service(sess)
 
 @app.route("/embed", methods=['POST'])
 def embed():
-    image = request.form.get("image")
+    images = json.loads(request.form.get("images"))
 
-    embedding = service.embed(image)
+    embedding = service.embed_all(images)
 
     return jsonify(
-                embedding= embedding,
+                embedding= embedding.tolist(),
                 )
 
 def main():
