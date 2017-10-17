@@ -1,8 +1,9 @@
 import os
+import json
 from face_api import FaceAPI
 from cognitive_face import CognitiveFaceException
 
-FACE_PATH = '/home/viruch/Documents/projects/SA/PersonalFaceData/'
+FACE_PATH = '/home/viruch/Documents/projects/SA/PersonalFaceDataCortana/'
 max_test_sample_size = 7
 verify_sample_size = 3
 
@@ -40,12 +41,6 @@ def split_data_set(test_sample_size, verify_sample_size):
 
 
 def upload(test_set):
-    try:
-        faceAPI.create_person_group()
-    except CognitiveFaceException:
-        print "failed to create group: " + faceAPI.group_id
-        pass
-
     for dirname, test_files in test_set:
         person = faceAPI.create_person(FACE_PATH, dirname)
         personId = person["personId"]
@@ -96,16 +91,27 @@ def verify(verify_set):
     return correct / len(results)
 
 
+def saveResults(res):
+    with open(os.path.join(FACE_PATH, "results.json"), 'w') as f:
+        json.dump(res, f)
+
 def main():
-    faceAPI.reset(FACE_PATH)
+    #faceAPI.reset(FACE_PATH)
+    try:
+        faceAPI.create_person_group()
+    except CognitiveFaceException:
+        print "failed to create group: " + faceAPI.group_id
+        pass
+    res = []
     for test_sample_size in range(1, max_test_sample_size + 1):
         test_set, verify_set = split_data_set(test_sample_size, verify_sample_size)
         upload(test_set)
-        showServerContent()
         faceAPI.train()
         successrate = verify(verify_set)
         print ("test sample size: %i verify sample size: %i successrate: %f" %
                (test_sample_size, verify_sample_size, successrate))
+        res.append({"test_sample_size": test_sample_size, "successrate": successrate})
+    saveResults(res)
 
 
 if __name__ == '__main__':
