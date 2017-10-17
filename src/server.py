@@ -12,7 +12,6 @@ import os
 import random
 import sys
 from face_mind import FaceMind
-import align.detect_face
 from sklearn.svm import SVC
 from scipy import misc
 import base64
@@ -64,8 +63,6 @@ def classify():
     image_name=("%05d-classify." % random_key)+ext
     image_path = os.path.join(TMP_FOLDER, image_name)
     image = misc.imread(file)
-    if request.form.get("align") == "true":
-      image = face_mind.align(image)
 
     misc.imsave(image_path, image)
 
@@ -110,8 +107,6 @@ def store():
       os.makedirs(base_path)
     image_path = os.path.join(base_path, secure_filename(file_name))
     image = misc.imread(file)
-    if request.form.get("align") == "true":
-      image = face_mind.align(image)
     misc.imsave(image_path, image)
     face_mind.store(image_path, secure_filename(label))
     face_mind.save_classifier(args.classifier_filename)
@@ -155,7 +150,6 @@ def main():
   with sess as sess:
     np.random.seed(seed=args.seed)
 
-    face_mind.load_model(args.model)
     if os.path.isfile(args.classifier_filename):
       face_mind.load_classifier(args.classifier_filename)
     else:
@@ -168,9 +162,6 @@ def main():
 def parse_arguments(argv):
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--model', type=str,
-                      help='Could be either a directory containing the meta_file and ckpt_file or a model protobuf (.pb) file',
-                      default="/base-model")
   parser.add_argument('--classifier_filename',
                       help='Classifier model file name as a pickle (.pkl) file. ' +
                            'For training this is the output and for classification this is an input.',
