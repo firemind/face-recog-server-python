@@ -1,5 +1,6 @@
 import facenet
 import tensorflow as tf
+import time
 
 class Service:
   """A simple example class"""
@@ -19,7 +20,9 @@ class Service:
     return self.embed_all([image])[0]
 
   def embed_all(self, images):
+    start = time.time()
     feed_dict = {self.images_placeholder: images, self.phase_train_placeholder: False}
     emb_array = self.sess.run(self.embeddings, feed_dict=feed_dict)
+    print(time.time() - start)
     return emb_array
 

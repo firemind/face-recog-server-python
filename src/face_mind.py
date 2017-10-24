@@ -2,6 +2,10 @@ import json
 import math
 import os
 import pickle
+import time
+from scipy import misc
+import base64
+import requests
 
 import numpy as np
 # from sklearn.svm import SVC
@@ -37,21 +41,28 @@ class FaceMind:
 
   def classify_all(self, image_paths):
     # Get input and output tensors
-    images = facenet.load_data(image_paths, False, False, self.image_size)
-    emb_array = self.request_embedding(images)
+    emb_array = self.request_embedding(image_paths)
     predictions = self.model.predict_proba(emb_array)
     best_class_indices = np.argmax(predictions, axis=1)
     best_class_probabilities = predictions[np.arange(len(best_class_indices)), best_class_indices]
     return map(lambda i: [self.class_names[best_class_indices[i]], best_class_probabilities[i]], range(len(best_class_indices)))
 
-  def request_embedding(self, images):
-    params = urllib.urlencode({'images': json.dumps( images.tolist())})
-    conn = httplib.HTTPConnection(os.environ['EMBEDDING_SERVER'], os.environ['EMBEDDING_PORT'])
-    headers = {"Content-type": "application/x-www-form-urlencoded",
-            "Accept": "text/json"}
-    conn.request("POST", "/embed", params, headers)
-    response = conn.getresponse()
-    data = response.read()
+  def request_embedding(self, image_paths):
+    # params = urllib.urlencode({'images': json.dumps( images.tolist())})
+    multiple_files = map(lambda i: ('images', (os.path.basename(i), open(i, 'rb'), 'image/png')), image_paths)
+    url = "http://"+os.environ['EMBEDDING_SERVER']+":"+os.environ['EMBEDDING_PORT']+"/embed"
+    r = requests.post(url, files=multiple_files)
+    data = r.text
+
+    # params = urllib.urlencode({'images': json.dumps(map(lambda x: base64.b64encode(misc.toimage(x, channel_axis=2).tobytes()), images))})
+    # conn = httplib.HTTPConnection()
+    # headers = {"Content-type": "application/x-www-form-urlencoded",
+    #         "Accept": "text/json"}
+    # start = time.time()
+    # conn.request("POST", "", params, headers)
+    # response = conn.getresponse()
+    # data = response.read()
+    # print(time.time() - start)
     return json.loads(data)['embedding']
 
   def store(self, image_path, label):
@@ -64,8 +75,7 @@ class FaceMind:
     print("%s is at %d" % (label, i))
 
     self.labels.append(i)
-    images = facenet.load_data([image_path], False, False, self.image_size)
-    res = self.request_embedding(images)
+    res = self.request_embedding([image_path])
     self.emb_array = np.append(self.emb_array, res, axis=0)
     self.fit()
 
@@ -81,8 +91,7 @@ class FaceMind:
       start_index = i * batch_size
       end_index = min((i + 1) * batch_size, nrof_images)
       paths_batch = paths[start_index:end_index]
-      images = facenet.load_data(paths_batch, False, False, self.image_size)
-      self.emb_array[start_index:end_index, :] = self.request_embedding(images)
+      self.emb_array[start_index:end_index, :] = self.request_embedding(paths_batch)
     self._set_model()
     self.class_names = [cls.name.replace('_', ' ') for cls in dataset]
     self.fit()

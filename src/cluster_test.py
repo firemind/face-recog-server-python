@@ -26,8 +26,8 @@ def main(args):
 
   paths, labels = facenet.get_image_paths_and_labels(dataset)
 
-  images = facenet.load_data(paths, False, False, face_mind.image_size)
-  emb_array = face_mind.request_embedding(images)
+  # images = facenet.load_data(paths, False, False, face_mind.image_size)
+  emb_array = face_mind.request_embedding(paths)
   print("Calculated Embeddings")
   for idx, emb in enumerate(emb_array):
     face_tracker.track(paths[idx], emb)

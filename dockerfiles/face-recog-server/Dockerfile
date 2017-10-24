@@ -1,6 +1,7 @@
 from tensorflow/tensorflow
 
 RUN pip install flask 
+RUN pip install requests
 
 COPY entrypoint.sh /
 

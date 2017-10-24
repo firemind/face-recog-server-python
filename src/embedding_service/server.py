@@ -2,13 +2,20 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from flask import Flask, request, redirect, url_for, jsonify, send_from_directory, render_template
+from flask import Flask, request, request, url_for, jsonify, send_from_directory, render_template
 import tensorflow as tf
 import argparse
 import sys
+import facenet
 from service import Service
 import json
+from scipy import misc
+from PIL import Image
+import base64
+import numpy as np
+
 app = Flask(__name__)
+
 
 tf.Graph().as_default()
 sess = tf.Session()
@@ -17,7 +24,8 @@ service = Service(sess)
 
 @app.route("/embed", methods=['POST'])
 def embed():
-    images = json.loads(request.form.get("images"))
+    uploaded_files = request.files.getlist("images")
+    images = facenet.load_data(map(lambda x: x.stream, uploaded_files), False, False, 160)
 
     embedding = service.embed_all(images)
 
