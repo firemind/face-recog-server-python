@@ -12,11 +12,16 @@ services:
       - ./tmp:/tmp/
       - ./store:/store/
       - ./svm-model:/svm-model/
-      - ~/our_dataset:/images/ 
-      - ~/our_dataset:/face-data 
+      - /media/mike/HD/our_dataset_verification:/images/
+      - /media/mike/HD/our_dataset_verification:/face-data
+    environment:
+      - "EMBEDDING_SERVER=embedding-service"
+      - "EMBEDDING_PORT=5000"
   embedding-service: 
     image: embedding-service
     build: dockerfiles/embedding-service
+    ports:
+      - "5001:5000"
     container_name: embedding-service
     volumes:
       - ./src:/app/

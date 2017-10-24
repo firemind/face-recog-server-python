@@ -46,7 +46,7 @@ class FaceMind:
 
   def request_embedding(self, images):
     params = urllib.urlencode({'images': json.dumps( images.tolist())})
-    conn = httplib.HTTPConnection("embedding-service", 5000)
+    conn = httplib.HTTPConnection(os.environ['EMBEDDING_SERVER'], os.environ['EMBEDDING_PORT'])
     headers = {"Content-type": "application/x-www-form-urlencoded",
             "Accept": "text/json"}
     conn.request("POST", "/embed", params, headers)
