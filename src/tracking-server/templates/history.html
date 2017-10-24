@@ -1,0 +1,12 @@
+<!doctype html>
+<title>History for {{ label }}</title>
+<table>
+  <tr>
+    <th></th>
+  </tr>
+  {% for e in entries %}
+    <tr>
+      <td><img src="/images/{{ e }}" /></td>
+    </tr>
+  {% endfor %}
+</table>

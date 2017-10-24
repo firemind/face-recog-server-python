@@ -2,17 +2,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from flask import Flask, request, request, url_for, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify
 import tensorflow as tf
 import argparse
 import sys
 import facenet
 from service import Service
-import json
-from scipy import misc
-from PIL import Image
-import base64
-import numpy as np
 
 app = Flask(__name__)
 

@@ -2,19 +2,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
-import numpy as np
 import argparse
-import facenet
-import os
 import sys
-import math
-import pickle
-from sklearn.svm import SVC
-import time
 
-from face_mind import FaceMind
-from face_tracker import FaceTracker
+import facenet
+import numpy as np
+from src.face_tracker import FaceTracker
+
+from src.face_mind import FaceMind
 
 face_mind = FaceMind()
 face_tracker = FaceTracker()
@@ -33,7 +28,7 @@ def main(args):
     face_tracker.track(paths[idx], emb)
 
   for idx, label in enumerate(labels):
-    pred = face_tracker.get_history(emb_array[idx])
+    pred = face_tracker.history_by_emb(emb_array[idx])
     print(label)
     print(pred)
 

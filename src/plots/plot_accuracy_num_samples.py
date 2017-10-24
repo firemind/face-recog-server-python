@@ -16,7 +16,7 @@ import numpy as np
 import sys
 import argparse
 import facenet
-from face_mind import FaceMind
+from src.face_mind import FaceMind
 
 tf.Graph().as_default()
 sess = tf.Session()

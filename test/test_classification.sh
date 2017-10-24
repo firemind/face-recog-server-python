@@ -1,5 +1,5 @@
 #!/bin/bash
-source $PWD/config.sh
+source $PWD/../config.sh
 #IMAGE="/media/mike/HD/our_dataset_verification/Random/Random.jpg"
 
 function request {
@@ -11,4 +11,4 @@ function request {
 export -f request
 
 #find /media/mike/HD/our_dataset_verification/ -type f -exec bash -c 'request "$0"' "{}" \;
-find test/ -type f -exec bash -c 'request "$0"' "{}" \;
+find classification/ -type f -exec bash -c 'request "$0"' "{}" \;

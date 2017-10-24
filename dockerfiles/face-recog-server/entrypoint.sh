@@ -1,1 +1,1 @@
-python -u /app/server.py
+python -u /app/recog-server/server.py

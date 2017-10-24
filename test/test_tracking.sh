@@ -1,15 +1,14 @@
 #!/bin/bash
-source $PWD/config.sh
+source $PWD/../config.sh
 #IMAGE="/media/mike/HD/our_dataset_verification/Random/Random.jpg"
 
 function request {
-  NAME="Alissa White-Gluz"
   image=$1
   echo $image
-  curl -F "image=@$image" -F "label=$NAME" -F "align=true" $SERVER_URL/store
+  curl -F "image=@$image" -F "data={}" http://localhost:5002/track
   echo 
 }
 export -f request
 
 #find /media/mike/HD/our_dataset_verification/ -type f -exec bash -c 'request "$0"' "{}" \;
-find test/to_store -type f -exec bash -c 'request "$0"' "{}" \;
+find tracking/ -type f -exec bash -c 'request "$0"' "{}" \;

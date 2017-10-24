@@ -13,7 +13,12 @@ class FaceTracker:
     if assigned_label not in  self.images:
       self.images[assigned_label] = []
     self.images[assigned_label].append(image)
+    return assigned_label
 
-  def get_history(self, emb):
+  def history_by_label(self, label):
+    print(self.images[label])
+    return self.images[label]
+
+  def history_by_emb(self, emb):
     pred = self.model.predict(np.array([emb]))[0]
     return self.images[pred]

@@ -17,7 +17,23 @@ services:
     environment:
       - "EMBEDDING_SERVER=embedding-service"
       - "EMBEDDING_PORT=5000"
-  embedding-service: 
+      - "PYTHONPATH=/app"
+  tracking:
+    image: tracking-server
+    build: dockerfiles/tracking-server
+    links:
+      - embedding-service
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./src:/app/
+      - ./tmp:/tmp/
+      - ./tracking_store:/store/
+    environment:
+      - "EMBEDDING_SERVER=embedding-service"
+      - "EMBEDDING_PORT=5000"
+      - "PYTHONPATH=/app"
+  embedding-service:
     image: embedding-service
     build: dockerfiles/embedding-service
     ports:

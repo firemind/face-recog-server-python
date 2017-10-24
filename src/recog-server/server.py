@@ -26,11 +26,9 @@ STORE_FOLDER = '/store'
 LOG_FILE = '/face.log'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
-
 def allowed_file(filename):
   return '.' in filename and \
          filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 app = Flask(__name__)
 for d in [IMAGE_FOLDER,TMP_FOLDER,STORE_FOLDER]:
