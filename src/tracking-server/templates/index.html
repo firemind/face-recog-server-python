@@ -1,0 +1,14 @@
+<!doctype html>
+<title>Index</title>
+<table>
+  <tr>
+    <th>Label</th>
+    <th>Last Image</th>
+  </tr>
+  {% for label in labels %}
+    <tr>
+      <td>{{ label[0] }}</td>
+      <td><a href="/history/{{ label[0] }}"><img src="/images/{{ label[1] }}" /></a></td>
+    </tr>
+  {% endfor %}
+</table>

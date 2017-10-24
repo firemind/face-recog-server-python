@@ -68,6 +68,10 @@ def history(label):
 def send_image(path):
   return send_from_directory(STORE_FOLDER, path)
 
+@app.route('/')
+def index_labels():
+  return render_template('index.html', labels=map(lambda label: [label, os.path.basename(face_tracker.history_by_label(label)[-1])], face_tracker.labels()))
+
 def main():
   global sess
   with sess as sess:

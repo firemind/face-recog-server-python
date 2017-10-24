@@ -22,3 +22,6 @@ class FaceTracker:
   def history_by_emb(self, emb):
     pred = self.model.predict(np.array([emb]))[0]
     return self.images[pred]
+
+  def labels(self):
+    return self.images.keys()
