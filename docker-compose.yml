@@ -6,7 +6,7 @@ services:
     links:
       - embedding-service
     ports:
-      - "5000:5000"
+      - "5003:5000"
     volumes:
       - ./src:/app/
       - ./tmp:/tmp/

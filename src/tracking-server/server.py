@@ -34,31 +34,13 @@ def allowed_file(filename):
 
 @app.route("/track", methods=['POST'])
 def track():
-
-  data = json.loads(request.form.get('data'))
-  file = request.files['image']
-  if file and allowed_file(file.filename):
-    print(file.filename)
-    # todo secure_filename removes umlauts. maybe there is a way to preserve them?
-    ext = secure_filename(file.filename).rsplit('.', 1)[1].lower()
-    random_key = np.random.randint(0, high=9999999999)
-    file_name = ("%010d.%s" % (random_key, ext))
-    base_path = os.path.join(STORE_FOLDER)
-    if not os.path.isdir(base_path):
-      os.makedirs(base_path)
-    image_path = os.path.join(base_path, secure_filename(file_name))
-    image = misc.imread(file)
-    misc.imsave(image_path, image)
-    if 'embedding' in data:
-      emb = data['embedding']
-    else:
-      emb = face_mind.request_embedding([image_path])[0]
-    label = face_tracker.track(image_path, emb)
-    print(image_path)
-    return jsonify(
-                label=label,
-                history_url="/history/"+str(label)
-                )
+  data = request.get_json()
+  emb = data['embedding']
+  id = data['id']
+  label = face_tracker.track(id, emb)
+  return jsonify(
+              label=label
+              )
 
 @app.route("/history/<int:label>", methods=['GET'])
 def history(label):

@@ -5,7 +5,7 @@ source $PWD/../config.sh
 function request {
   image=$1
   echo $image
-  curl -F "image=@$image" -F "data={}" http://localhost:5002/track
+  curl -F "image=@$image" -F "data={\"location\":\"cam1\"}" http://localhost:3000/track
   echo 
 }
 export -f request

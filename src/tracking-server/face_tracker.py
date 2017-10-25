@@ -7,7 +7,6 @@ class FaceTracker:
     self.images = {}
 
   def track(self, image, emb):
-    # print("tracking %s" % image)
     self.model.partial_fit(np.array([emb]))
     assigned_label = self.model.labels_[0]
     if assigned_label not in  self.images:
@@ -16,7 +15,6 @@ class FaceTracker:
     return assigned_label
 
   def history_by_label(self, label):
-    print(self.images[label])
     return self.images[label]
 
   def history_by_emb(self, emb):
