@@ -47,10 +47,8 @@ def index_labels():
   return render_template('index.html', labels=map(lambda label: [label, os.path.basename(face_tracker.history_by_label(label)[-1])], face_tracker.labels()))
 
 def main():
-  global sess
-  with sess as sess:
 
-    app.run(host="0.0.0.0")
+  app.run(host="0.0.0.0")
 
 
 def parse_arguments(argv):
