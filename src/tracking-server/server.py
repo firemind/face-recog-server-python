@@ -3,22 +3,14 @@ from __future__ import division
 from __future__ import print_function
 
 from flask import Flask, request, request, url_for, jsonify, send_from_directory, render_template
-import tensorflow as tf
-from werkzeug.utils import secure_filename
 import argparse
 import sys
 from face_tracker import FaceTracker
 from face_mind import FaceMind
-import json
-from scipy import misc
-import numpy as np
 import os
 
 app = Flask(__name__)
 
-
-tf.Graph().as_default()
-sess = tf.Session()
 
 face_tracker = FaceTracker();
 face_mind = FaceMind();

@@ -108,67 +108,67 @@ def store():
 
 @app.route('/images/<path:path>')
 def send_image(path):
-  path = base64.b64decode(path)
-  print(path)
-  return send_from_directory('/images', path)
+path = base64.b64decode(path)
+print(path)
+return send_from_directory('/images', path)
 
 @app.route('/tmp_images/<path:path>')
 def send_tmp_image(path):
-  path = base64.b64decode(path)
-  print(path)
-  return send_from_directory(TMP_FOLDER, path)
+path = base64.b64decode(path)
+print(path)
+return send_from_directory(TMP_FOLDER, path)
 
 @app.route('/classes')
 def index_classes():
-  return render_template('classes.html', classes=map(lambda i: [face_mind.class_names[i], face_mind.labels.count(i), random_image_url_for(face_mind.class_names[i])], range(0, len(face_mind.class_names))))
+return render_template('classes.html', classes=map(lambda i: [face_mind.class_names[i], face_mind.labels.count(i), random_image_url_for(face_mind.class_names[i])], range(0, len(face_mind.class_names))))
 
 @app.route('/log')
 def index_log():
-  classification_log=None
-  with open(LOG_FILE, 'rb') as f:
-    reader = csv.reader(f)
-    classification_log= list(reader)
-  return render_template('log.html', entries=classification_log)
+classification_log=None
+with open(LOG_FILE, 'rb') as f:
+  reader = csv.reader(f)
+  classification_log= list(reader)
+return render_template('log.html', entries=classification_log)
 
 def random_image_url_for(label):
-  image_url_path=""
-  if os.path.isdir(IMAGE_FOLDER):
-    class_dir = os.path.join(IMAGE_FOLDER, label)
-    if os.path.isdir(class_dir):
-      path = base64.b64encode(label+"/"+random.choice(os.listdir(class_dir)))
-      image_url_path="/images/"+ path
-  return image_url_path
+image_url_path=""
+if os.path.isdir(IMAGE_FOLDER):
+  class_dir = os.path.join(IMAGE_FOLDER, label)
+  if os.path.isdir(class_dir):
+    path = base64.b64encode(label+"/"+random.choice(os.listdir(class_dir)))
+    image_url_path="/images/"+ path
+return image_url_path
 
 def main():
-  np.random.seed(seed=args.seed)
+np.random.seed(seed=args.seed)
 
-  if os.path.isfile(args.classifier_filename):
-    face_mind.load_classifier(args.classifier_filename)
-  else:
-    face_mind.train(args.data_dir)
-    face_mind.save_classifier(args.classifier_filename)
+if os.path.isfile(args.classifier_filename):
+  face_mind.load_classifier(args.classifier_filename)
+else:
+  face_mind.train(args.data_dir)
+  face_mind.save_classifier(args.classifier_filename)
 
-  app.run(host="0.0.0.0")
+app.run(host="0.0.0.0")
 
 
 def parse_arguments(argv):
-  parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
-  parser.add_argument('--classifier_filename',
-                      help='Classifier model file name as a pickle (.pkl) file. ' +
-                           'For training this is the output and for classification this is an input.',
-                      default="/svm-model/model.pkl")
-  parser.add_argument('--batch_size', type=int,
-                      help='Number of images to process in a batch.', default=90)
-  parser.add_argument('--seed', type=int,
-                      help='Random seed.', default=666)
-  parser.add_argument('--min_nrof_images_per_class', type=int,
-                      help='Only include classes with at least this number of images in the dataset', default=20)
-  parser.add_argument('--nrof_train_images_per_class', type=int,
-                      help='Use this number of images from each class for training and the rest for testing',
-                      default=10)
-  parser.add_argument('--data_dir', type=str,
-                      help='Path to the data directory containing aligned LFW face patches.', default="/face-data/")
+parser.add_argument('--classifier_filename',
+                    help='Classifier model file name as a pickle (.pkl) file. ' +
+                         'For training this is the output and for classification this is an input.',
+                    default="/svm-model/model.pkl")
+parser.add_argument('--batch_size', type=int,
+                    help='Number of images to process in a batch.', default=90)
+parser.add_argument('--seed', type=int,
+                    help='Random seed.', default=666)
+parser.add_argument('--min_nrof_images_per_class', type=int,
+                    help='Only include classes with at least this number of images in the dataset', default=20)
+parser.add_argument('--nrof_train_images_per_class', type=int,
+                    help='Use this number of images from each class for training and the rest for testing',
+                    default=10)
+parser.add_argument('--data_dir', type=str,
+                    help='Path to the data directory containing aligned LFW face patches.', default="/face-data/")
 
   return parser.parse_args(argv)
 

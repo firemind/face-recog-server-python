@@ -19,7 +19,7 @@ service = Service(sess)
 
 @app.route("/embed", methods=['POST'])
 def embed():
-    uploaded_files = request.files.getlist("images")
+    uploaded_files = request.files.getlist("images[]")
     images = facenet.load_data(map(lambda x: x.stream, uploaded_files), False, False, 160)
 
     embedding = service.embed_all(images)

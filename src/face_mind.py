@@ -2,17 +2,12 @@ import json
 import math
 import os
 import pickle
-import time
-from scipy import misc
-import base64
 import requests
 
 import numpy as np
-# from sklearn.svm import SVC
 from sklearn import linear_model
 
 from embedding_service import facenet
-import httplib, urllib
 
 class FaceMind:
   """A simple example class"""

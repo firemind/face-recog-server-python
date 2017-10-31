@@ -42,3 +42,11 @@ services:
     volumes:
       - ./src:/app/
       - ~/models/facenet/dl-20170511-185253/:/base-model/
+  face-mind-server:
+    image: face-mind-server
+    build: dockerfiles/face-mind-server
+    ports:
+      - "5004:5000"
+    container_name: face-mind-server
+    volumes:
+      - ./src:/app/
