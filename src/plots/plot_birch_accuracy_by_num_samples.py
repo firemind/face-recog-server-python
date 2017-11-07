@@ -16,7 +16,7 @@ print(len(emb_array))
 print(len(labels))
 print(len(class_names))
 
-test_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+test_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 6000]
 threshold = 0.9
 scores = []
 class_count_diffs = []
