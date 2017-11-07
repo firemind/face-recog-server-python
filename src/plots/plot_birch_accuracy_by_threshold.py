@@ -16,8 +16,8 @@ print(len(emb_array))
 print(len(labels))
 print(len(class_names))
 
-#thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98]
-thresholds = [0.8, 0.81, 0.82, 0.83, 0.84,0.85,0.86,0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94,0.95,0.96,0.97, 0.98]
+thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98]
+#thresholds = [0.8, 0.81, 0.82, 0.83, 0.84,0.85,0.86,0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94,0.95,0.96,0.97, 0.98]
 test_size = 500
 scores = []
 class_count_diffs = []
@@ -40,8 +40,13 @@ for threshold in thresholds:
 
     real_count = len(set(real_labels))
     pred_count = len(set(pred_labels))
-    count_diff = abs(pred_count - real_count)
-    class_count_diffs.append(1 - float(count_diff) / (pred_count+real_count))
+    # count_diff = abs(pred_count - real_count)
+    #class_count_diffs.append(1 - float(count_diff) / (pred_count+real_count))
+    # class_count_diffs.append(1 - float(count_diff) / (pred_count+real_count))
+    sim = (float(pred_count) / float(real_count))
+    if sim > 1:
+      sim = 1/ sim
+    class_count_diffs.append(sim)
     score = metrics.silhouette_score(X, pred_labels, metric='euclidean')
     scores.append(score)
 
