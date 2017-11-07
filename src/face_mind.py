@@ -44,7 +44,7 @@ class FaceMind:
 
   def request_embedding(self, image_paths):
     # params = urllib.urlencode({'images': json.dumps( images.tolist())})
-    multiple_files = map(lambda i: ('images', (os.path.basename(i), open(i, 'rb'), 'image/png')), image_paths)
+    multiple_files = map(lambda i: ('images[]', (os.path.basename(i), open(i, 'rb'), 'image/png')), image_paths)
     url = "http://"+os.environ['EMBEDDING_SERVER']+":"+os.environ['EMBEDDING_PORT']+"/embed"
     r = requests.post(url, files=multiple_files)
     data = r.text

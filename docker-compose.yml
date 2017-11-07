@@ -18,6 +18,19 @@ services:
 #      - "EMBEDDING_SERVER=embedding-service"
 #      - "EMBEDDING_PORT=5000"
 #      - "PYTHONPATH=/app"
+#  train:
+#    image: face-mind-train
+#    build: dockerfiles/train
+#    links:
+#      - embedding-service
+#    volumes:
+#      - ./src:/app/
+#      - ./svm-model:/svm-model/
+#      - /home/mike/our_dataset:/face-data
+#    environment:
+#      - "EMBEDDING_SERVER=embedding-service"
+#      - "EMBEDDING_PORT=5000"
+#      - "PYTHONPATH=/app"
   tracking:
     image: tracking-server
     build: dockerfiles/tracking-server
