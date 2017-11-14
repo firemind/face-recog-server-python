@@ -5,7 +5,7 @@ class FaceTracker:
     self._set_model();
 
   def _set_model(self):
-    self.model = Birch(branching_factor=50, n_clusters=None, threshold=0.9,compute_labels=True, copy=False)
+    self.model = Birch(branching_factor=50, n_clusters=None, threshold=0.8,compute_labels=True, copy=False)
     self.images = {}
 
   def track(self, image, emb):
