@@ -1,9 +1,11 @@
 from sklearn.cluster import Birch
 import numpy as np
 class FaceTracker:
-  """A simple example class"""
   def __init__(self):
-    self.model = Birch(branching_factor=50, n_clusters=None, threshold=0.7,compute_labels=True, copy=False)
+    self._set_model();
+
+  def _set_model(self):
+    self.model = Birch(branching_factor=50, n_clusters=None, threshold=0.9,compute_labels=True, copy=False)
     self.images = {}
 
   def track(self, image, emb):
@@ -23,3 +25,6 @@ class FaceTracker:
 
   def labels(self):
     return self.images.keys()
+
+  def reset(self):
+    self._set_model();
