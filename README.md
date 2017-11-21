@@ -1,8 +1,9 @@
 # Face Recognition Server
 
 ## Requirements
-Install [Docker](https://www.docker.com/community-edition)
-Install [Docker-Compose](https://docs.docker.com/compose/)
+
+* Install [Docker](https://www.docker.com/community-edition)
+* Install [Docker-Compose](https://docs.docker.com/compose/)
 
 ## Install & run
 
