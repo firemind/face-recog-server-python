@@ -1,35 +1,36 @@
 # Face Recognition Server
 
-![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/face_recog_server.png "Architecture")
-
-# SVM Fitting Times
-![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/SVM_fitting_time.png "SVM Fitting Times")
-
 ## Requirements
-Install [Git LFS](https://git-lfs.github.com/)
 Install [Docker](https://www.docker.com/community-edition)
-
-## Configure
-
-Change in `config.sh` `FACE_DATASET` to your dataset location
+Install [Docker-Compose](https://docs.docker.com/compose/)
 
 ## Install & run
 
 ```bash
 git clone https://github.com/firemind/face-recog-server-python
 cd face-recog-server-python/
-./build.sh
-./start.sh
+docker-compose up
 ```
 
-## Test
+## Architecture
+
+![Diagram](https://github.com/firemind/face-recog-server-python/raw/master/face_recog_server.png "Architecture")
+
+## Documentation
+
+![Wiki](https://github.com/firemind/facial-recognition-sa-2017/wiki)
+
+
+## Running Test Scripts
+
+### Configure
+
+Adjust `config.sh` to match the location of your dataset and server URL.
+
+
+### Test
 
 ```bash
-./test.sh
-```
-
-## Train
-
-```bash
-./train.sh
+cd test
+./test_tracking.sh
 ```
