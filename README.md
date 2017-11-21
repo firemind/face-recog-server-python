@@ -4,6 +4,7 @@
 
 * Install [Docker](https://www.docker.com/community-edition)
 * Install [Docker-Compose](https://docs.docker.com/compose/)
+* Download [Pre-Trained Facenet Model](https://drive.google.com/file/d/0B5MzpY9kBtDVOTVnU3NIaUdySFE) and place it in ~/models/facenet/dl-20170511-185253/ (configurable in docker-compose.yml)
 
 ## Install & run
 
@@ -31,3 +32,8 @@ docker-compose up
 cd test
 ./test_tracking.sh
 ```
+
+
+## Acknowledgements
+
+Face embeddings are calculated using the Tensorflow-based facenet https://github.com/davidsandberg/facenet
