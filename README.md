@@ -25,11 +25,6 @@ docker-compose up
 
 ## Running Test Scripts
 
-### Configure
-
-Adjust `config.sh` to match the location of your dataset and server URL.
-
-
 ### Test
 
 ```bash

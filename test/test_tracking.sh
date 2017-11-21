@@ -1,11 +1,9 @@
 #!/bin/bash
-source $PWD/../config.sh
-#IMAGE="/media/mike/HD/our_dataset_verification/Random/Random.jpg"
 
 function request {
   image=$1
   echo $image
-  curl -F "image=@$image" -F "data={\"location\":\"cam1\"}" http://localhost:3000/track
+  curl -F "image=@$image" -F "data={\"location\":\"cam1\", \"positions\":[{\"width\":100,\"height\":100,\"left\":10,\"top\":10}]}" http://localhost:3000/track
   echo 
 }
 export -f request

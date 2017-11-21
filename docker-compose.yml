@@ -1,36 +1,5 @@
 version: '2'
 services:
-#  web:
-#    image: face-recog-server
-#    build: dockerfiles/face-recog-server
-#    links:
-#      - embedding-service
-#    ports:
-#      - "5003:5000"
-#    volumes:
-#      - ./src:/app/
-#      - ./tmp:/tmp/
-#      - ./store:/store/
-#      - ./svm-model:/svm-model/
-#      - /media/mike/HD/our_dataset_verification:/images/
-#      - /media/mike/HD/our_dataset_verification:/face-data
-#    environment:
-#      - "EMBEDDING_SERVER=embedding-service"
-#      - "EMBEDDING_PORT=5000"
-#      - "PYTHONPATH=/app"
-#  train:
-#    image: face-mind-train
-#    build: dockerfiles/train
-#    links:
-#      - embedding-service
-#    volumes:
-#      - ./src:/app/
-#      - ./svm-model:/svm-model/
-#      - /home/mike/our_dataset:/face-data
-#    environment:
-#      - "EMBEDDING_SERVER=embedding-service"
-#      - "EMBEDDING_PORT=5000"
-#      - "PYTHONPATH=/app"
   tracking:
     image: tracking-server
     build: dockerfiles/tracking-server
@@ -41,7 +10,6 @@ services:
     volumes:
       - ./src:/app/
       - ./tmp:/tmp/
-      - ./tracking_store:/store/
     environment:
       - "EMBEDDING_SERVER=embedding-service"
       - "EMBEDDING_PORT=5000"
@@ -55,11 +23,3 @@ services:
     volumes:
       - ./src:/app/
       - ~/models/facenet/dl-20170511-185253/:/base-model/
-  face-mind-server:
-    image: face-mind-server
-    build: dockerfiles/face-mind-server
-    ports:
-      - "5004:5000"
-    container_name: face-mind-server
-    volumes:
-      - ./src:/app/
