@@ -15,11 +15,11 @@ face_tracker = FaceTracker();
 @app.route("/track", methods=['POST'])
 def track():
   data = request.get_json()
-  emb = data['embedding']
-  id = data['id']
-  label = face_tracker.track(id, emb)
+  embs = data['embeddings']
+  ids = data['ids']
+  labels = face_tracker.track(ids, embs)
   return jsonify(
-              label=label
+              labels=labels.tolist()
               )
 
 @app.route("/reset", methods=['POST'])

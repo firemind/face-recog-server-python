@@ -8,13 +8,17 @@ class FaceTracker:
     self.model = Birch(branching_factor=50, n_clusters=None, threshold=0.63, compute_labels=True, copy=False)
     self.images = {}
 
-  def track(self, image, emb):
-    self.model.partial_fit(np.array([emb]))
-    assigned_label = self.model.labels_[0]
-    if assigned_label not in  self.images:
-      self.images[assigned_label] = []
-    self.images[assigned_label].append(image)
-    return assigned_label
+  def track(self, imgs, embs):
+    self.model.partial_fit(np.array(embs))
+    assigned_labels = self.model.labels_
+    ix = 0
+    for assigned_label in assigned_labels:
+      if assigned_label not in self.images:
+        self.images[assigned_label] = []
+      self.images[assigned_label].append(imgs[ix])
+      ix += 1
+    return assigned_labels
+
 
   def history_by_label(self, label):
     return self.images[label]
